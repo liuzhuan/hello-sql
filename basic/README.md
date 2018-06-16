@@ -1,11 +1,64 @@
 # 基础知识
 
-这里摘录了《SQL 必知必会》一书的要点。笔记的顺序是颠倒的，即书中越新的部分，越靠前。
+这里摘录了《SQL 必知必会》一书的要点。笔记的顺序是颠倒的，即书中越靠后的部分，在笔记中越靠前。
 
 倒序记笔记有一个好处，开头是最难的，越往后看越简单。
 
+## SELECT 子句顺序
 
-创建分组
+```sql
+SELECT
+FROM
+WHERE
+GROUP BY
+HAVING
+ORDER BY
+```
+
+## 分组和排序
+
+一般在使用 `GROUP BY` 子句时，应该也给出 `ORDER BY` 子句。这是保证数据正确排序的唯一方法。
+
+```sql
+SELECT order_num, COUNT(*) AS items
+FROM OrderItems
+GROUP BY order_num
+HAVING COUNT(*) >= 3
+ORDER BY items, order_num;
+```
+
+## 过滤分组
+
+`WHERE` 过滤行，而 `HAVING` 过滤分组。两者职责类似。
+
+```sql
+-- 列出拥有两个或更多订单的顾客ID
+SELECT cust_id, COUNT(*) AS orders
+FROM Orders
+GROUP BY cust_id
+HAVING COUNT(*) >= 2;
+```
+
+`WHERE` 在数据分组前进行过滤，`HAVING` 在数据分组后进行过滤。
+
+```sql
+-- 列出具有两个以上产品且其价格大于等于4的供应商
+SELECT vent_id, COUNT(*) AS num_prods
+FROM Products
+WHERE prod_price >= 4
+GROUP BY vent_id
+HAVING COUNT(*) >= 2;
+```
+
+## 创建分组
+
+`GROUP BY` 分组的重要规定
+
+- `GROUP BY` 子句可以包含任意数目的列，可以嵌套分组
+- 如果嵌套分组，则在最后指定的分组上进行汇总
+- `GROUP BY` 子句的每一列都必须是检索列或有效表达式，不能使用别名
+- 大部分 SQL 实现不允许长度可变的数据类型（如文本或备注型字段）
+- `GROUP BY` 子句必须出现在 `WHERE` 子句之后，`ORDER BY` 子句之前
 
 ```sql
 SELECT vend_id, COUNT(＊) AS num_prods￼
@@ -129,9 +182,7 @@ FROM Vendors￼
 ORDER BY vend_name;
 ```
 
-去左空格 LTRIM
-去右空格 RTRIM
-去空格 TRIM
+去左空格 `LTRIM`；去右空格 `RTRIM`；去空格 `TRIM`。
 
 ```sql
 SELECT RTRIM(vend_name) + ' (' + RTRIM(vend_country) + ')'￼
