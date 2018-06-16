@@ -21,14 +21,14 @@ SELECT
     MIN(prod_price) AS price_min,￼
     MAX(prod_price) AS price_max,￼
     AVG(prod_price) AS price_avg￼
-    FROM Products;
+FROM Products;
 ```
 
 DISTINCT 修饰聚集函数
 
 ```sql
 SELECT AVG(DISTINCT prod_price) 
-AS avg_price￼
+    AS avg_price￼
 FROM Products￼
 WHERE vend_id = 'DLL01';
 ```
@@ -37,14 +37,14 @@ WHERE vend_id = 'DLL01';
 
 ```sql
 SELECT SUM(quantity) 
-AS items_ordered￼  
+    AS items_ordered￼  
 FROM OrderItems￼
 WHERE order_num = 20005;
 ```
 
 ```sql
 SELECT SUM(item_price * quantity)
-AS total_price￼
+    AS total_price￼
 FROM OrderItems￼
 WHERE order_num = 20005;
 ```
@@ -52,38 +52,33 @@ WHERE order_num = 20005;
 `MIN()` 函数
 
 ```sql
-SELECT MIN(prod_price)
-AS min_price￼
+SELECT MIN(prod_price) AS min_price￼
 FROM Products;
 ```
 
 `MAX()` 函数
 
 ```sql
-SELECT MAX(prod_price)
-AS max_price￼
+SELECT MAX(prod_price) AS max_price￼
 FROM Products;
 ```
 
 `COUNT()` 函数
 
 ```sql
-SELECT COUNT(*)
-AS num_cust￼
+SELECT COUNT(*) AS num_cust￼
 FROM Customers;
 ```
 
 ```sql
-SELECT COUNT(cust_email)
-AS num_cust￼
+SELECT COUNT(cust_email) AS num_cust￼
 FROM Customers;
 ```
 
 `AVG()` 函数
 
 ```sql
-SELECT AVG(prod_price)
-AS avg_price￼
+SELECT AVG(prod_price) AS avg_price￼
 FROM Products;
 ```
 
@@ -129,7 +124,7 @@ WHERE order_num = 20008;
 
 ```sql
 SELECT RTRIM(vend_name) + ' (' + RTRIM(vend_country) + ')'￼
-AS vend_title￼
+    AS vend_title￼
 FROM Vendors￼
 ORDER BY vend_name;
 ```
@@ -163,8 +158,7 @@ ORDER BY vend_name;
 ```sql
 SELECT cust_contact￼
 FROM Customers￼
-WHERE cust_contact
-LIKE '[^JM]%'￼
+WHERE cust_contact LIKE '[^JM]%'￼
 ORDER BY cust_contact;
 ```
 
@@ -173,8 +167,7 @@ ORDER BY cust_contact;
 ```sql
 SELECT cust_contact￼
 FROM Customers￼
-WHERE cust_contact
-LIKE '[JM]%'￼
+WHERE cust_contact LIKE '[JM]%'￼
 ORDER BY cust_contact;
 ```
 
@@ -184,7 +177,7 @@ ORDER BY cust_contact;
 SELECT prod_id, prod_name￼
 FROM Products￼
 WHERE prod_name
-LIKE '__ inch teddy bear';
+    LIKE '__ inch teddy bear';
 ```
 
 `%` 通配符，匹配任意个字符，包括零个。
@@ -210,7 +203,7 @@ ORDER BY prod_name;
 SELECT prod_name, prod_price￼
 FROM Products￼
 WHERE vend_id 
-IN ( 'DLL01', 'BRS01' )￼
+    IN ( 'DLL01', 'BRS01' )￼
 ORDER BY prod_name;
 ```
 
@@ -219,8 +212,9 @@ ORDER BY prod_name;
 ```sql
 SELECT prod_name, prod_price￼
 FROM Products￼
-WHERE (vend_id = 'DLL01' OR vend_id = 'BRS01')￼
-AND prod_price >= 10;
+WHERE 
+    (vend_id = 'DLL01' OR vend_id = 'BRS01')￼
+    AND prod_price >= 10;
 ```
 
 `OR` 子句
