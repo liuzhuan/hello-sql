@@ -4,6 +4,149 @@
 
 倒序记笔记有一个好处，开头是最难的，越往后看越简单。
 
+## 使用的数据表
+
+本书使用的表是一个玩具经销商的订单录入系统的组成部分，表中数据包含以下内容：
+
+- 供应商（Vendors 表）
+- 产品目录（Products 表）
+- 顾客信息（Customers 表）
+- 顾客订单（Orders 表和 OrderItems 表）
+
+各表的字段说明如下：
+
+Vendors 表
+
+```
+vend_id         唯一ID（主键）
+vend_name       名称
+vend_address    地址
+vend_city       所在城市
+vend_state      所在州
+vend_zip        邮政编码
+vend_country    所在国家
+```
+
+Products 表
+
+```
+prod_id     唯一产品 ID（主键）
+vend_id     产品供应商 ID（外键，关联到 Vendors 的 vend_id 列）
+prod_name   产品名
+prod_price  产品价格
+prod_desc   产品描述
+```
+
+Customers 表
+
+```
+cust_id     唯一的顾客ID（主键）
+cust_name
+cust_address
+cust_city
+cust_state
+cust_zip
+cust_country
+cust_contact
+cust_email
+```
+
+Orders 表
+
+```
+order_num   唯一的订单号（主键）
+order_date  订单日期
+cust_id     订单顾客ID（外键，关联到 Customers 表的 cust_id 列）
+```
+
+OrderItems 表
+
+```
+order_num   订单号（主键之一，兼外键，关联到 Orders 表的 order_num 列）
+order_item  订单物品号（主键之二，订单内的顺序）
+prod_id     产品ID（外键，关联到 Products 表的 prod_id）
+quantity    物品数量
+item_price  物品价格
+```
+
+## 作为计算字段使用子查询
+
+使用子查询的另一个方法是创建计算字段。假如需要显示 Customers 表中每个顾客的订单总数。所需步骤如下：
+
+1. 从 Customers 表中检索顾客列表
+2. 对于每个顾客，统计其在 Orders 表中的订单数目
+
+首先，统计单个顾客（比如 1000000001）的订单总数如下：
+
+```sql
+SELECT COUNT(*) AS orders
+FROM Orders
+WHERE cust_id = '1000000001';
+```
+
+要查询每个顾客的订单总量，可以这么处理：
+
+```sql
+SELECT 
+    cust_name,
+    cust_state,
+    (
+        SELECT COUNT(*)
+        FROM Orders
+        WHERE Orders.cust_id = Customers.cust_id -- 使用完全限定列名
+    ) AS orders
+FROM Customers
+ORDER BY cust_name;
+```
+
+## 利用子查询进行过滤
+
+如果要检索订购物品 GRAN01 的所有顾客，首先列出三个子查询：
+
+```sql
+SELECT order_num
+FROM OrderItems
+WHERE prod_id = 'RGAN01'; -- => 20007, 20008
+
+SELECT cust_id
+FROM Orders
+WHERE order_num IN (20007, 20008); -- => 1000000004, 1000000005
+```
+
+以上两个子查询可以合并为：
+
+```sql
+SELECT cust_id
+FROM Orders
+WHERE order_num IN (
+    SELECT order_num
+    FROM OrderItems
+    WHERE prod_id = 'RGAN01'
+);
+```
+
+如果要查询顾客信息，可以进一步嵌套子查询：
+
+```sql
+SELECT cust_name, cust_contact
+FROM Customers
+WHERE cust_id IN (
+    SELECT cust_id
+    FROM Orders
+    WHERE order_num IN (
+        SELECT order_num
+        FROM OrderItems
+        WHERE prod_id = 'RGAN01'
+    )
+);
+```
+
+⚠️ 注意，作为子查询的 SELECT 语句只能查询单个列。
+
+## 子查询
+
+子查询（subquery）指嵌套在其他查询中的查询。
+
 ## SELECT 子句顺序
 
 ```sql
@@ -173,7 +316,7 @@ FROM OrderItems￼
 WHERE order_num = 20008;
 ```
 
-别名
+## 别名
 
 ```sql
 SELECT RTRIM(vend_name) + ' (' + RTRIM(vend_country) + ')'￼
@@ -190,7 +333,7 @@ FROM Vendors￼
 ORDER BY vend_name;
 ```
 
-拼接
+## 拼接
 
 ```sql
 SELECT vend_name + ' (' + vend_country + ')'￼
