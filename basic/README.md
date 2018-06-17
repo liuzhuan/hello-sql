@@ -85,7 +85,43 @@ WHERE Vendors.vend_id = Products.vend_id; -- 必须使用完全限定列名
 
 有时候，返回笛卡尔积的联结，也称作**叉联结**（cross join）。
 
-// TODO
+### 内联结
+
+等值联结（equi-join）基于两个表之间的相等测试，也称为内联结（inner join）。
+
+也可以使用不同的语法，明确联结类型。
+
+```sql
+SELECT vend_name, prod_name, prod_price
+FROM Vendors INNER JOIN Products
+    ON Vendors.vend_id = Products.vend_id;
+```
+
+此时，联结条件使用 `ON` 子句而不是 `WHERE` 子句给出。
+
+ANSI SQL 规范首选 `INNER JOIN` 语法。
+
+### 联结多个表
+
+```sql
+SELECT prod_name, vend_name, prod_price, quantity
+FROM OrderItems, Products, Vendors
+WHERE
+    Products.vend_id = Vendors.vend_id
+    AND OrderItems.prod_id = Products.prod_id
+    AND order_num = 20007;
+```
+
+⚠️ 注意，不要联结不必要的表，联结的表越多，性能下降越厉害。
+
+```sql
+SELECT cust_name, cust_contact
+FROM Customers, Orders, OrderItems
+WHERE
+    Customers.cust_id = Orders.cust_id
+    AND OrderItems.order_num = Orders.order_num
+    AND prod_id = 'RGAN01';
+```
 
 ## 联结
 
@@ -609,5 +645,7 @@ SQL 是一种专门用来与数据库沟通的语言。
 ## REF
 
 - [SQL 必知必会][sql]，by *Ben Forta*，人民邮电出版社，2013/05/01
+- [Join (SQL)][wiki-join]
 
 [sql]: https://book.douban.com/subject/24250054/
+[wiki-join]: https://en.wikipedia.org/wiki/Join_(SQL)
