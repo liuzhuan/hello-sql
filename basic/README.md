@@ -69,6 +69,82 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 创建视图
+
+视图用 `CREATE VIEW` 语句来创建。
+
+删除视图，使用 `DROP` 语句，语法为 `DROP VIEW viewname`。
+
+### 利用视图简化复杂的联结
+
+一个最常见的视图应用是隐藏复杂的 SQL。
+
+```sql
+CREATE VIEW ProductCustomers AS
+SELECT cust_name, cust_contact, prod_id
+FROM Customers, Orders, OrderItems
+WHERE
+    Customers.cust_id = Orders.cust_id
+    AND OrderItems.order_num = Orders.order_num;
+```
+
+### 用视图重新格式化检索出的数据
+
+```sql
+CREATE VIEW VendorLocations AS
+SELECT RTRIM(vend_name) + ' (' + RTRIM(vend_country) + ')'
+    AS vend_title
+FROM Vendors;
+
+SELECT *
+FROM VendorLoactions;
+```
+
+### 用视图过滤不想要的数据
+
+```sql
+CREATE VIEW CustomerEMailList AS
+SELECT cust_id, cust_name, cust_email
+FROM Customers
+WHERE cust_email IS NOT NULL;
+```
+
+### 使用视图与计算字段
+
+```sql
+CREATE VIEW OrderItemsExpanded AS
+SELECT
+    order_num,
+    prod_id,
+    quantity,
+    item_price,
+    quantity * item_price AS expanded_price
+FROM OrderItems;
+```
+
+## 视图
+
+视图是虚拟的表，它只包含动态检索数据的查询。
+
+如果我们要检索购买了某种商品的顾客，如果使用 SELECT 语句，需要如此搜索：
+
+```sql
+SELECT cust_name, cust_contact
+FROM Customers, Orders, OrderItems
+WHERE
+    Customers.cust_id = Orders.cust_id
+    AND OrderItems.order_num = Orders.order_num
+    AND prod_id = 'RGAN01';
+```
+
+假如可以把整个查询包装为一个虚拟表 ProductCustomers，则可以轻松检索相同的数据：
+
+```sql
+SELECT cust_name, cust_contact
+FROM ProductCustomers
+WHERE prod_id = 'RGAN01';
+```
+
 ## 重命名表
 
 每个 DBMS 对于重命名的支持有所不同。
