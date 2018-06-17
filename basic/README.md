@@ -69,6 +69,43 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 删除数据
+
+```sql
+DELETE FROM Customers
+WHERE cust_id = '1000000006';
+```
+
+使用外键确保引用完整性的一个好处是，DBMS 通常可以防止删除某个关系需要用到的行。
+
+## 更新数据
+
+比如，更新客户 1000000005 的电子邮件：
+
+```sql
+UPDATE Customers
+SET cust_email = 'kim@thetoystore.com'
+WHERE cust_id = '1000000005';
+```
+
+更新多个列的语法稍有不同：
+
+```sql
+UPDATE Customers
+SET
+    cust_contact = 'Sam Roberts',
+    cust_email = 'sam@toyland.com'
+WHERE cust_id = '1000000006';
+```
+
+要删除某个列的值，可设置它为 NULL：
+
+```sql
+UPDATE Customers
+SET cust_email = NULL
+WHERE cust_id = '1000000005';
+```
+
 ## 从一个表复制到另一个表
 
 要将一个表的内容复制到一个全新的表，可以使用 `SELECT INTO` 语句。
