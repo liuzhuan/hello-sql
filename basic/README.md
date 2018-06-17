@@ -69,6 +69,127 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 从一个表复制到另一个表
+
+要将一个表的内容复制到一个全新的表，可以使用 `SELECT INTO` 语句。
+
+```sql
+SELECT *
+INTO CustCopy
+FROM Customers;
+
+-- MariaDB, MySQL, Oracle, PostgreSQL 和 SQLite 语法稍有不同
+CREATE TABLE CustCopy AS
+    SELECT *
+    FROM Customers;
+```
+
+## 数据插入
+
+### 插入完整的行
+
+```sql
+INSERT INTO Customers
+VALUES(
+    '1000000006',
+    'Toy Land',
+    '123 Any Street',
+    'New York',
+    'NY',
+    '11111',
+    'USA',
+    NULL,
+    NULL
+);
+```
+
+虽然这种语法简单，但并不安全，应该尽量避免使用。因为它高度依赖于表中列的定义次序。
+
+⚠️ 注意，编写完全依赖于特定次序的 SQL 语句是很不安全的，迟早会出问题。
+
+推荐的做法是：
+
+```sql
+INSERT INTO Customers(
+    cust_id,
+    cust_name,
+    cust_address,
+    cust_city,
+    cust_state,
+    cust_zip,
+    cust_country,
+    cust_contact,
+    cust_email
+)
+VALUES(
+    '1000000006',
+    'Toy Land',
+    '123 Any Street',
+    'New York',
+    'NY',
+    '11111',
+    'USA',
+    NULL,
+    NULL
+)
+```
+
+给出列名使 SQL 代码可以有更通用的适用范围，即使表结构发生了变化。
+
+### 插入部分行
+
+对于可以为 NULL 的列，列名可以省略，比如：
+
+```sql
+INSERT INTO Customers(
+    cust_id,
+    cust_name,
+    cust_address,
+    cust_city,
+    cust_state,
+    cust_zip,
+    cust_country
+)
+VALUES(
+    '1000000006',
+    'Toy Land',
+    '123 Any Street',
+    'New York',
+    'NY',
+    '11111',
+    'USA'
+)
+```
+
+### 插入检索出的数据
+
+```sql
+INSERT INTO Customers(
+    cust_id,
+    cust_contact,
+    cust_email,
+    cust_name,
+    cust_address,
+    cust_city,
+    cust_state,
+    cust_zip,
+    cust_country
+)
+SELECT
+    cust_id,
+    cust_contact,
+    cust_email,
+    cust_name,
+    cust_address,
+    cust_city,
+    cust_state,
+    cust_zip,
+    cust_country
+FROM CustNew;
+```
+
+DBMS 一点儿也不关心 SELECT 返回的列名。它使用的使列的位置。
+
 ## 创建组合查询
 
 可以使用 `UNION` 操作符来组合数条 SQL 查询。
