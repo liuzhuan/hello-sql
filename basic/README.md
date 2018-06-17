@@ -69,6 +69,68 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 重命名表
+
+每个 DBMS 对于重命名的支持有所不同。
+
+## 删除表
+
+```sql
+DROP TABLE CustCopy;
+```
+
+许多 DBMS 允许强制实施有关规则，防止删除与其他表相关联的表。
+
+## 更新表
+
+更新表定义，可以使用 `ALTER TABLE` 语句。
+
+例如，给一个表中增加一个列：
+
+```sql
+ALTER TABLE Vendors
+ADD vend_phone CHAR(20);
+```
+
+删除列如下：
+
+```sql
+ALTER TABLE Vendors
+DROP COLUMN vend_phone;
+```
+
+## 创建表
+
+可以使用 `CREATE TABLE` 创建表。
+
+```sql
+CREATE TABLE Products(
+    prod_id     CHAR(10)        NOT NULL,
+    vend_id     CHAR(10)        NOT NULL,
+    prod_name   CHAR(254)       NOT NULL,
+    prod_price  DECIMAL(8,2)    NOT NULL,
+    prod_desc   VARCHAR(1000)   NULL
+);
+```
+
+### 指定默认值
+
+默认值在 `CREATE TABLE` 语句的列定义中用关键字 `DEFAULT` 指定。
+
+```sql
+CREATE TABLE OrderItems (
+    order_num   INTEGER         NOT NULL,
+    order_item  INTEGER         NOT NULL,
+    prod_id     CHAR(10)        NOT NULL,
+    quantity    INTEGER         NOT NULL    DEFAULT 1,
+    item_price  DECIMAL(8,2)    NOT NULL
+)
+```
+
+默认值经常用于日期或时间戳列。例如通过指定引用系统日期的函数或变量，将系统时间用作默认日期。
+
+例如，在 MySQL 中获取系统时间的变量是 `CURRENT_DATE()`；SQLite 中为 `date('now')`。
+
 ## 删除数据
 
 ```sql
