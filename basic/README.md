@@ -69,6 +69,101 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 创建存储过程
+
+假如我们要对邮件发送清单中具有邮件地址的顾客进行计数。
+
+下面是 Oracle 版：
+
+```sql
+-- 创建过程
+CREATE PROCEDURE MailingListCount (
+    ListCount OUT INTEGER -- OUT 表示从存储过程返回值
+)
+IS
+v_rows INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO v_rows
+    FROM Customers
+    WHERE NOT cust_email IS NULL;
+    ListCount := v_rows;
+END;
+
+-- 以下是调用方式
+var ReturnValue NUMBER
+EXEC MailingListCount(:ReturnValue);
+SELECT ReturnValue;
+```
+
+以下是 SQL Server 版本：
+
+```sql
+CREATE PROCEDURE MailingListCount
+AS
+DECLARE @cnt INTEGER -- 声明局部变量
+SELECT @cnt = COUNT(*)
+FROM Customers
+WHERE NOT cust_email IS NULL;
+RETURN @cnt;
+
+-- 以下是存储过程的调用方法
+DECLARE @ReturnValue INT
+EXECUTE @ReturnValue=MailingListCount;
+SELECT @ReturnValue;
+```
+
+下面的例子在 Orders 表中插入一个新订单。此程序仅适用于 SQL Server。
+
+```sql
+CREATE PROCEDURE NewOrder @cust_id CHAR(10)
+AS
+-- Declare variable for order number
+DECLARE @order_num INTEGER
+-- Get current highest order number
+SELECT @order_num=MAX(order_num)
+FROM Orders
+-- Determine next order number
+SELECT @order_num=@order_num+1
+-- Insert new order
+INSERT INTO Orders(order_num, order_date, cust_id)
+VALUES(@order_num, GETDATE(), @cust_id)
+-- Return order number
+RETURN @order_num;
+```
+
+在编写存储过程时应该多加注释。
+
+## 执行存储过程
+
+```sql
+EXECUTE AddNewProduct(
+    'JTS01',
+    'Stuffed Eiffel Tower',
+    6.49,
+    'Plush stuffed toy with the text LaTour Eiffel in red white and blue'
+);
+```
+
+要保证恰当地生成 ID，最好是使生成此 ID 的过程自动化。
+
+## 为什么要使用存储过程
+
+1. 简化复杂操作
+2. 保证数据的一致性
+3. 简化对变动的管理
+4. 提高性能
+
+存储过程也有一些注意事项：
+
+1. 不同 DBMS 的存储过程语法有所不同
+2. 编写存储过程比编写基本 SQL 语句复杂，需要更高的技能，更丰富的经验
+
+## 存储过程
+
+在实际的数据库应用中，一个处理需要针对许多表的多条 SQL 语句。此外，需要执行的具体 SQL 语句及其次序也不是固定的，它们可能会根据物品是否在库存中而变化。
+
+简单来说，存储过程就是为以后使用而保存的一条或多条 SQL 语句。可以将其视为批处理文件，但是它们的作用远不止这些。
+
 ## 创建视图
 
 视图用 `CREATE VIEW` 语句来创建。
