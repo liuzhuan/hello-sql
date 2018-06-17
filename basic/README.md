@@ -69,6 +69,44 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 创建组合查询
+
+可以使用 `UNION` 操作符来组合数条 SQL 查询。
+
+假如需要 Illinois, Indiana 和 Michigan 等美国几个州的所有顾客的报表，还想包括不管位于哪个州的所有的 Fun4All。首先，使用单条 SQL 语句如下：
+
+```sql
+SELECT cust_name, cust_contact, cust_email
+FROM Customers
+WHERE cust_state IN ('IL', 'IN', 'MI');
+
+SELECT cust_name, cust_contact, cust_email
+FROM Customers
+WHERE cust_name = 'Fun4All';
+```
+
+组合这两条语句，如下：
+
+```sql
+SELECT cust_name, cust_contact, cust_email
+FROM Customers
+WHERE cust_state IN ('IL', 'IN', 'MI')
+UNION
+SELECT cust_name, cust_contact, cust_email
+FROM Customers
+WHERE cust_name = 'Fun4All';
+```
+
+使用 `UNION` 时，重复的行会被自动取消。这是 `UNION` 的默认行为，如果愿意也可以改变它，使用 `UNION ALL` 代替 `UNION` 即可。
+
+### 对组合查询结果排序
+
+在用 `UNION` 组合查询时，只能使用一种 `ORDER BY` 子句，它必须位于最后一条 `SELECT` 语句之后。
+
+## 组合查询
+
+SQL 允许执行多个查询，并将结果作为一个查询结果集返回。这些组合查询通常成为并（union）或复合查询（compound query）。
+
 ## 使用带聚集函数的联结
 
 比如，要检索所有顾客及每个顾客所下的订单数：
