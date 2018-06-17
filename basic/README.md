@@ -69,6 +69,79 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 使用带聚集函数的联结
+
+比如，要检索所有顾客及每个顾客所下的订单数：
+
+```sql
+SELECT 
+    Customers.cust_id,
+    COUNT(Orders.order_num) AS num_ord
+FROM Customers INNER JOIN Orders
+    ON Customers.cust_id = Orders.cust_id
+GROUP BY Customers.cust_id;
+```
+
+## 使用不同类型的联结
+
+除了内联结或等值联结外，还有其他三种联结：
+
+- 自联结（self join）
+- 自然联结（natural join）
+- 外联结（outer join）
+
+### 自联结
+
+如果要给与 Jim Jones 同一公司的所有顾客发送一封邮件。
+
+```sql
+SELECT c1.cust_id, c1.cust_name, c1.cust_contact
+FROM Customers AS c1, Customers AS c2
+WHERE
+    c1.cust_id = c2.cust_id
+    AND c2.cust_name = 'Jim Jones'
+```
+
+### 自然联结
+
+自然联结排除多次出现的列，使每一列只返回一次。
+
+```sql
+SELECT C.*, O.order_num, O.order_date, OI.prod_id, OI.quantity, OI.item_price
+FROM Customers AS C, Orders AS O, OrderItems as OI
+WHERE 
+    C.cust_id = O.cust_id
+    AND OI.order_num = O.order_num
+    AND prod_id = 'RGAN01';
+```
+
+### 外联结
+
+外联结包含了那些在相关表中没有关联行的行。
+
+比如，要检索包括没有订单顾客在内的所有顾客的订单：
+
+```sql
+SELECT Customers.cust_id, Orders.order_num
+FROM Customers LEFT OUTER JOIN Orders
+    ON Customers.cust_id = Orders.cust_id;
+```
+
+在使用 `OUTER JOIN` 语法时，必须使用 `RIGHT` 或 `LEFT` 关键字指定包含所有行的表。
+
+上面的例子使用 `LEFT OUTER JOIN` 从 `FROM` 子句左边的表（Customers）中选择所有行。
+
+## 使用表别名
+
+```sql
+SELECT cust_name, cust_contact
+FROM Customers AS C, Orders AS O, OrderItems AS OI
+WHERE
+    C.cust_id = O.cust_id
+    AND OI.order_num = O.order_num
+    AND prod_id = 'RGAN01';
+```
+
 ## 创建联结
 
 ```sql
