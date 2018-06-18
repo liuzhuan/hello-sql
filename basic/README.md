@@ -69,6 +69,86 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 使用游标
+
+### 创建游标
+
+使用 `DECLARE` 语句创建游标，并定义相应的 `SELECT` 语句。
+
+```sql
+-- for DB2, MariaDB, MySQL and SQL Server
+DECLARE CustCursor CURSOR
+FOR
+SELECT * FROM Customers
+WHERE cust_email IS NULL;
+
+-- for Oracle and PostgreSQL
+DECLARE CURSOR CustCursor
+IS
+SELECT * FROM Customers
+WHERE cust_email IS NULL;
+```
+
+### 使用游标
+
+使用 `OPEN CURSOR` 语句打开游标。
+
+```sql
+OPEN CURSOR CustCursor;
+```
+
+使用 `FETCH` 语句访问游标数据。
+
+```sql
+-- for Oracle
+-- fetch the first line
+DECLARE TYPE CustCursor IS REF CURSOR
+    RETURN Customers%ROWTYPE;
+DECLARE CustRecord Customers%ROWTYPE
+BEGIN
+    OPEN CustCursor;
+    FETCH CustCursor INTO CustRecord;
+    CLOSE CustCursor;
+END;
+```
+
+下面的例子从第一行到最后一行，对检索出来的数据进行循环：
+
+```sql
+-- for Oracle
+DECLARE TYPE CustCursor IS REF CURSOR
+    RETURN Customers%ROWTYPE;
+DECLARE CustRecord Customers%ROWTYPE
+BEGIN
+    OPEN CustCursor;
+    LOOP
+    FETCH CustCursor INTO CustRecord;
+    EXIT WHEN CustCursor%NOTFOUND;
+    ...
+    END LOOP;
+    CLOSE CustCursor;
+END;
+```
+
+### 关闭游标
+
+游标在使用完毕时需要关闭。此外，SQL SERVER 等 DBMS 要求明确释放游标所占用的资源。
+
+```sql
+-- for DB2, Oracle and PostgreSOL
+CLOSE CustCursor;
+
+-- for Microsoft SQL Server
+CLOSE CustCursor;
+DEALLOCATE CURSOR CustCursor;
+```
+
+## 游标
+
+SQL 检索操作返回的行（零行或多行），称为结果集（result set）。
+
+当需要在结果集中导航时，就需要用到游标（cursor）。不同的 DBMS 对于游标的支持情况也不同。比如，SQLite 支持的游标称为步骤（step）。
+
 ## 控制事务处理
 
 管理事务的关键在于将 SQL 语句组分解为逻辑块，并明确规定数据何时应该回退，何时不应该回退。
