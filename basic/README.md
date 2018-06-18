@@ -69,6 +69,115 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 控制事务处理
+
+管理事务的关键在于将 SQL 语句组分解为逻辑块，并明确规定数据何时应该回退，何时不应该回退。
+
+有的 DBMS 要求明确标识事务处理块的开始和结束。如在 SQL Server 中，标识如下：
+
+```sql
+BEGIN TRANSACTION
+...
+COMMIT TRANSACTION
+```
+
+MariaDB 和 MySQL 中等同的代码为：
+
+```sql
+START TRANSACTION
+...
+```
+
+多数 DBMS 实现没有明确标识事务处理在何处结束。事务一直存在，直到被中断。通常，`COMMIT` 用于保存更改，`ROLLBACK` 用于撤销。
+
+### 使用 ROLLBACK
+
+SQL 的 `ROLLBACK` 命令用来回退（撤销）语句。
+
+```sql
+DELETE FROM Orders;
+ROLLBACK;
+```
+
+### 使用 COMMIT
+
+一般的 SQL 语句都是针对数据库表直接执行和编写的，即所谓的隐式提交（`implicit commit`），也就是说，提交操作是自动进行的。
+
+在事务处理块中，提交不会隐式进行。需要使用 `COMMIT` 进行明确的提交。
+
+下面是一个 SQL Server 的例子：
+
+```sql
+BEGIN TRANSACTION
+DELETE OrderItems WHERE order_num = 12345
+DELETE Orders WHERE order_num = 12345
+COMMIT TRANSACTION
+```
+
+### 使用保留点
+
+复杂的事务可能需要部分提交或回退。要支持回退部分事务，必须在事务处理块中的合适位置放置占位符。这样，如果需要回退，可以回退到某个占位符。
+
+在 SQL 中，这些占位符称为保留点。在 MariaDB、MySQL 和 Oracle 中创建占位符，可使用 `SAVEPOINT` 语句。
+
+```sql
+SAVEPOINT delete1;
+```
+
+在 SQL Server 中，进行如下操作：
+
+```sql
+SAVE TRANSACTION delete1;
+```
+
+每个保留点的名字都是唯一的。
+
+要回退到某个保留点，在 SQL Server 和 Oracle（或 MariaDB, MySQL） 中如下处理：
+
+```sql
+-- SQL Server
+ROLLBACK TRANSACTION delete1;
+
+-- MariaDB, MySQL or Oracle
+ROLLBACK TO delete1; 
+```
+
+下面是一个完整的 SQL Server 例子
+
+```sql
+BEGIN TRANSACTION
+
+INSERT INTO Customers(cust_id, cust_name)
+VALUES('1000000010', 'Toys Emporium');
+
+SAVE TRANSACTION StartOrder;
+
+INSERT INTO Orders(order_num, order_date, cust_id)
+VALUES(20100, '2001/12/1', '1000000010');
+IF @@ERROR <> 0 ROLLBACK TRANSACTION StartOrder;
+
+INSERT INTO OrderItems(order_num, order_item, prod_id, quantity, item_price)
+VALUES(20100, 1, 'BR01', 100, 5.49);
+IF @@ERROR <> 0 ROLLBACK TRANSACTION StartOrder;
+
+INSERT INTO OrderItems(order_num, order_item, prod_id, quantity, item_price)
+VALUES(20100, 2, 'BR03', 100, 10.99);
+IF @@ERROR <> 0 ROLLBACK TRANSACTION StartOrder;
+
+COMMIT TRANSACTION;
+```
+
+## 事务处理
+
+使用事务处理（`transaction processing`），通过确保成批的 SQL 操作要么完全执行，要么完全不执行，来维护数据库的完整性。
+
+关于事务处理需要之道几个术语：
+
+- 事务（transaction）指一组 SQL 语句
+- 回退（rollback）指撤销指定 SQL 语句的过程
+- 提交（commit）指将未存储的 SQL 语句结果写入数据库表
+- 保留点（savepoint）指事务处理中设置的临时占位符（placeholder），可以对它发布回退（与回退整个事务处理不同）。
+
 ## 创建存储过程
 
 假如我们要对邮件发送清单中具有邮件地址的顾客进行计数。
