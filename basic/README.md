@@ -69,6 +69,131 @@ quantity    物品数量
 item_price  物品价格
 ```
 
+## 数据库安全
+
+任何安全系统的基础都是用户授权和身份确认。
+
+安全性使用 SQL 的 `GRANT` 和 `REVOKE` 语句来管理。
+
+## 触发器
+
+触发器是特殊的存储过程，它在特殊的数据库活动发生时自动执行。
+
+触发器与单个表相关联。与 Orders 表上的 INSERT 操作相关联的触发器只在 Orders 表中插入行时执行。
+
+下面的例子创建一个触发器，它对所有 INSERT 和 UPDATE 操作，将 Customers 表中的 cust_state 列转换为大写。
+
+```sql
+-- for SQL Server
+CREATE TRIGGER customer_state
+ON Customers
+FOR INSERT, UPDATE
+AS
+UPDATE Customers
+SET cust_state = Upper(cust_state)
+WHERE Customers.cust_id = inserted.cust_id;
+
+-- for Oracle and PostgreSQL
+CREATE TRIGGER customer_state
+AFTER INSERT OR UPDATE
+FOR EACH ROW
+BEGIN
+UPDATE Customers
+SET cust_state = Upper(cust_state)
+WHERE Customers.cust_id = :OLD.cust_id
+END;
+```
+
+## 索引
+
+索引用来排序数据以加快搜索和排序操作的速度。
+
+在开始创建索引前，要记住以下几点：
+
+1. 索引改善了检索性能，却降低了插入、修改和删除的性能
+2. 索引数据可能要占用大量的存储空间
+
+索引用 `CREATE INDEX` 语句创建。
+
+下面的语句在 Products 表的产品名列上创建一个简单的索引。
+
+```sql
+-- 索引必须唯一命名
+CREATE INDEX prod_name_ind
+ON PRODUCTS (prod_name);
+```
+
+## 约束
+
+约束（constraint）指管理如何插入或处理数据库数据的规则。DBMS 通过在数据库表上施加约束来实施引用完整性。
+
+### 主键
+
+主键是一种特殊的约束，用来保证一列（或多列）中的值是唯一的，并且永不改动。
+
+定义主键的方法：
+
+```sql
+-- when creating table
+CREATE TABLE Vendors (
+    vend_id     CHAR(10)    NOT NULL    PRIMARY KEY,
+    vend_name   CHAR(50)    NOT NULL,
+    -- ...
+)
+
+-- when altering table
+ALTER TABLE Vendors
+ADD CONSTRAINT PRIMARY KEY (vend_id);
+```
+
+### 外键
+
+外键是表中的一列，其值必须在另一表的主键中。外键是保证引用完整性的极其重要的部分。
+
+定义外键的方法：
+
+```sql
+-- when creating table
+CREATE TABLE Orders (
+    order_num   INTEGER     NOT NULL    PRIMARY KEY,
+    order_date  DATETIME    NOT NULL,
+    cust_id     CHAR(10)    NOT NULL    REFERENCES Customers(cust_id)
+);
+
+-- when altering table
+ALTER TABLE Orders
+ADD CONSTRAINT
+FOREIGN KEY (cust_id) REFERENCES Customers (cust_id);
+```
+
+提示，外键有助防止意外删除。
+
+### 唯一约束
+
+唯一约束用来保证一列（或多列）中的数据是唯一的。使用 `UNIQUE` 来约束。
+
+唯一约束可以看作是一个较弱的主键列，没有主键强势。
+
+### 检查约束
+
+检查约束用来保证一列（或多列）的数据满足一组指定的条件。
+
+比如，下面例子对 OrderItems 表施加了检查约束，它保证所有的物品数量都大于 0:
+
+```sql
+CREATE TABLE OrderItems {
+    ...
+    quantity    INTEGER     NOT NULL CHECK (quantity > 0),
+    ...
+}
+```
+
+检查名为 gender 的列只包含 M 或 F，可以编写如下的 `ALTER TABLE` 语句：
+
+```sql
+ADD CONSTRAINT CHECK (gender LIKE '[MF]')
+```
+
 ## 使用游标
 
 ### 创建游标
